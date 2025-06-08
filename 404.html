@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lost in Space - 404</title>
+    <meta name="description" content="Explore our solar system in 3D with StarMap. An interactive visualization that brings the cosmos to your browser with real-time NASA data, planetary orbits, and near-Earth object tracking.">
+    <link rel="apple-touch-icon" sizes="180x180" href="/public/favicon.svg">
+    <link rel="icon" type="image/svg+xml" sizes="32x32" href="/public/favicon.svg">
+    <link rel="icon" type="image/svg+xml" sizes="16x16" href="/public/favicon.svg">
+    <link rel="shortcut icon" href="/public/favicon.svg">
+    <meta property="og:title" content="StarMap | Interactive 3D Solar System">
+    <meta property="og:description" content="Explore our solar system in 3D with StarMap. An interactive visualization that brings the cosmos to your browser with real-time NASA data, planetary orbits, and near-Earth object tracking.">
+    <meta property="og:image" content="https://i.ibb.co/LXh38gpj/og-img.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://drbaph.is-a.dev/StarMap/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="StarMap | Interactive 3D Solar System">
+    <meta name="twitter:description" content="Explore our solar system in 3D with StarMap. An interactive visualization that brings the cosmos to your browser with real-time NASA data, planetary orbits, and near-Earth object tracking.">
+    <meta name="twitter:image" content="https://i.ibb.co/LXh38gpj/og-img.jpg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Starfield background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        .star.medium {
+            width: 3px;
+            height: 3px;
+            animation-duration: 2s;
+        }
+
+        .star.large {
+            width: 4px;
+            height: 4px;
+            animation-duration: 1.5s;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Floating cosmic elements */
+        .cosmic-element {
+            position: absolute;
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .asteroid {
+            background: radial-gradient(circle at 30% 30%, #666, #333);
+            box-shadow: 0 0 20px rgba(102, 102, 102, 0.3);
+        }
+
+        .planet {
+            background: radial-gradient(circle at 30% 30%, #4a90e2, #2c5aa0);
+            box-shadow: 0 0 30px rgba(74, 144, 226, 0.4);
+        }
+
+        .moon {
+            background: radial-gradient(circle at 30% 30%, #e6e6e6, #999);
+            box-shadow: 0 0 15px rgba(230, 230, 230, 0.3);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(120deg); }
+            66% { transform: translateY(10px) rotate(240deg); }
+        }
+
+        /* Main container */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* 404 number styling */
+        .error-code {
+            font-size: clamp(8rem, 20vw, 16rem);
+            font-weight: bold;
+            background: linear-gradient(45deg, #fbbf24, #f59e0b, #d97706);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 50px rgba(251, 191, 36, 0.5);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Main message */
+        .error-title {
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: white;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            letter-spacing: 0.05em;
+        }
+
+        .error-message {
+            font-size: clamp(1rem, 3vw, 1.25rem);
+            color: #d1d5db;
+            margin-bottom: 3rem;
+            max-width: 600px;
+            line-height: 1.6;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 0.5s forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Info panel styling */
+        .info-panel {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid #4b5563;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            max-width: 500px;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 1s forwards;
+        }
+
+        .mission-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ef4444;
+            margin-right: 0.5rem;
+            animation: blink 2s infinite;
+            box-shadow: 0 0 15px #ef4444;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        .status-text {
+            color: #ef4444;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .coordinates {
+            font-family: 'Courier New', monospace;
+            color: #9ca3af;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            border-left: 3px solid #fbbf24;
+        }
+
+        /* Navigation buttons */
+        .navigation {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 1.5s forwards;
+        }
+
+        .nav-button {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid #4b5563;
+            border-radius: 2rem;
+            padding: 0.75rem 2rem;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #6b7280;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-button:hover::before {
+            left: 100%;
+        }
+
+        .primary-button {
+            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+            border-color: #2563eb;
+        }
+
+        .primary-button:hover {
+            background: linear-gradient(45deg, #2563eb, #1d4ed8);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .info-panel {
+                padding: 1.5rem;
+                margin-bottom: 2rem;
+            }
+            
+            .navigation {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-button {
+                width: 100%;
+                max-width: 280px;
+                justify-content: center;
+            }
+        }
+
+        /* Earth animation in corner */
+        .earth-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 100px;
+            height: 100px;
+            opacity: 0.6;
+            z-index: 5;
+        }
+
+        .earth {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: 
+                radial-gradient(circle at 30% 30%, #4ade80, #059669),
+                radial-gradient(ellipse at 70% 70%, #3b82f6, transparent);
+            animation: rotate 20s linear infinite;
+            position: relative;
+            box-shadow: 0 0 50px rgba(74, 222, 128, 0.3);
+        }
+
+        .earth::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 20%;
+            width: 30%;
+            height: 60%;
+            background: #059669;
+            border-radius: 50%;
+            opacity: 0.7;
+        }
+
+        .earth::after {
+            content: '';
+            position: absolute;
+            top: 60%;
+            right: 20%;
+            width: 25%;
+            height: 30%;
+            background: #059669;
+            border-radius: 50%;
+            opacity: 0.7;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Signal animation */
+        .signal-container {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 5;
+        }
+
+        .signal {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #ef4444;
+            border-radius: 50%;
+            position: relative;
+            animation: radar 2s linear infinite;
+        }
+
+        .signal::before,
+        .signal::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border: 2px solid #ef4444;
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        .signal::before {
+            animation: radarWave 2s linear infinite;
+        }
+
+        .signal::after {
+            animation: radarWave 2s linear infinite 1s;
+        }
+
+        @keyframes radar {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes radarWave {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Starfield Background -->
+    <div class="stars" id="starfield"></div>
+
+    <!-- Floating Cosmic Elements -->
+    <div class="cosmic-element asteroid" style="width: 20px; height: 20px; top: 10%; left: 15%; animation-delay: 0s;"></div>
+    <div class="cosmic-element planet" style="width: 30px; height: 30px; top: 20%; right: 20%; animation-delay: 2s;"></div>
+    <div class="cosmic-element moon" style="width: 15px; height: 15px; top: 60%; left: 10%; animation-delay: 1s;"></div>
+    <div class="cosmic-element asteroid" style="width: 25px; height: 25px; top: 70%; right: 15%; animation-delay: 3s;"></div>
+    <div class="cosmic-element planet" style="width: 35px; height: 35px; top: 40%; left: 80%; animation-delay: 1.5s;"></div>
+
+    <!-- Signal indicator -->
+    <div class="signal-container">
+        <div class="signal"></div>
+    </div>
+
+    <!-- Earth in corner -->
+    <div class="earth-container">
+        <div class="earth"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="error-code">404</div>
+        
+        <h1 class="error-title">Lost in Space</h1>
+        
+        <p class="error-message">
+            Houston, we have a problem. The page you're looking for has drifted beyond our solar system. 
+            Our deep space sensors can't detect its coordinates in this galaxy.
+        </p>
+
+        <div class="info-panel">
+            <div class="mission-status">
+                <div class="status-indicator"></div>
+                <span class="status-text">Navigation System Offline</span>
+            </div>
+            
+            <div class="coordinates">
+                ERROR: Page not found in current star system<br>
+                LAST KNOWN COORDINATES: Unknown<br>
+                ESTIMATED DISTANCE: ∞ light-years<br>
+                MISSION STATUS: Navigation assistance required
+            </div>
+        </div>
+
+        <div class="navigation">
+            <a href="/" class="nav-button primary-button">
+                <span>🚀</span>
+                Return to Earth (Home)
+            </a>
+            
+            <a href="/map" class="nav-button">
+                <span>🌌</span>
+                View Star Map
+            </a>
+            
+            <a href="javascript:history.back()" class="nav-button">
+                <span>⬅️</span>
+                Previous Location
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Generate random stars
+        function createStarfield() {
+            const starfield = document.getElementById('starfield');
+            const numStars = 200;
+            
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                // Random size
+                const size = Math.random();
+                if (size > 0.8) {
+                    star.classList.add('large');
+                } else if (size > 0.6) {
+                    star.classList.add('medium');
+                }
+                
+                // Random position
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                
+                // Random animation delay
+                star.style.animationDelay = Math.random() * 3 + 's';
+                
+                starfield.appendChild(star);
+            }
+        }
+
+        // Create shooting star effect
+        function createShootingStar() {
+            const shootingStar = document.createElement('div');
+            shootingStar.style.position = 'fixed';
+            shootingStar.style.width = '2px';
+            shootingStar.style.height = '2px';
+            shootingStar.style.background = 'white';
+            shootingStar.style.borderRadius = '50%';
+            shootingStar.style.boxShadow = '0 0 10px white, -300px 0 100px white';
+            shootingStar.style.top = Math.random() * 50 + '%';
+            shootingStar.style.left = '100%';
+            shootingStar.style.zIndex = '1';
+            shootingStar.style.animation = 'shootingStar 3s linear forwards';
+            
+            document.body.appendChild(shootingStar);
+            
+            setTimeout(() => {
+                document.body.removeChild(shootingStar);
+            }, 3000);
+        }
+
+        // Add shooting star animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shootingStar {
+                0% {
+                    transform: translateX(0) translateY(0);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateX(-100vw) translateY(50vh);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize
+        createStarfield();
+        
+        // Create shooting stars periodically
+        setInterval(createShootingStar, 8000);
+        
+        // Add some interactivity
+        document.addEventListener('mousemove', (e) => {
+            const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
+            const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
+            
+            document.querySelectorAll('.cosmic-element').forEach((element, index) => {
+                const factor = (index + 1) * 0.1;
+                element.style.transform = `translate(${moveX * factor}px, ${moveY * factor}px)`;
+            });
+        });
+
+        // Add click effects
+        document.addEventListener('click', (e) => {
+            const ripple = document.createElement('div');
+            ripple.style.position = 'fixed';
+            ripple.style.left = e.clientX + 'px';
+            ripple.style.top = e.clientY + 'px';
+            ripple.style.width = '20px';
+            ripple.style.height = '20px';
+            ripple.style.border = '2px solid #fbbf24';
+            ripple.style.borderRadius = '50%';
+            ripple.style.transform = 'translate(-50%, -50%)';
+            ripple.style.animation = 'ripple 1s ease-out forwards';
+            ripple.style.pointerEvents = 'none';
+            ripple.style.zIndex = '1000';
+            
+            document.body.appendChild(ripple);
+            
+            setTimeout(() => {
+                document.body.removeChild(ripple);
+            }, 1000);
+        });
+
+        // Add ripple animation
+        const rippleStyle = document.createElement('style');
+        rippleStyle.textContent = `
+            @keyframes ripple {
+                0% {
+                    transform: translate(-50%, -50%) scale(1);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translate(-50%, -50%) scale(3);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(rippleStyle);
+
+        // Console easter egg
+        console.log(`
+        🚀 SPACE MISSION CONTROL 🚀
+        ================================
+        STATUS: Navigation Error 404
+        LOCATION: Unknown Sector
+        MISSION: Return to Earth safely
+        
+        Tip: Use the navigation controls to return home!
+        `);
+    </script>
+</body>
+</html>
